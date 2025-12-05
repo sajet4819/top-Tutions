@@ -12,9 +12,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     {/* Provide the Redux store to the entire application */}
     <Provider store={store}>
       {/* Provide routing capabilities to the entire application */}
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <BrowserRouter basename="/top-Tutions">
+  <App />
+</BrowserRouter>
     </Provider>
   </React.StrictMode>
 );
