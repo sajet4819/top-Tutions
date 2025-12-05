@@ -13,6 +13,6 @@ export default defineConfig({
       "Cross-Origin-Embedder-Policy": "unsafe-none"             // ← AND THIS (optional)
     }
   },
-    base: '/top-Tutions/'  // Replace with your repo name
+     base: process.env.NODE_ENV === 'production' ? '/top-Tutions/' : '/'  // Replace with your repo name
 
 })
