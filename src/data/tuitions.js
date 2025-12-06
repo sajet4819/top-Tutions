@@ -1,33 +1,39 @@
 // src/data/tuitions.js
 
-// 25 images from public folder (no import error!)
+// Helper to get correct base URL for images
+const getImagePath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base}${path.startsWith('/') ? path.slice(1) : path}`;
+};
+
+// 25 images from public folder (fixed for GitHub Pages!)
 const imageList = [
-  "/images/tuition1.avif",
-  "/images/tuition2.jpg",
-  "/images/tuition3.jpg",
-  "/images/tuition4.jpg",
-  "/images/tuition5.jpg",
-  "/images/tuition6.jpg",
-  "/images/tuition7.jpg",
-  "/images/tuition8.jpg",
-  "/images/tuition9.jpg",
-  "/images/tuition10.jpg",
-  "/images/tuition11.jpg",
-  "/images/tuition12.jpg",
-  "/images/tuition13.jpg",
-  "/images/tuition14.jpg",
-  "/images/tuition15.jpg",
-  "/images/tuition16.jpg",
-  "/images/tuition17.jpg",
-  "/images/tuition18.jpg",
-  "/images/tuition19.jpg",
-  "/images/tuition20.jpg",
-  "/images/tuition21.jpg",
-  "/images/tuition22.jpg",
-  "/images/tuition23.jpg",
-  "/images/tuition24.jpg",
-  "/images/tuition25.jpg",
-];
+  "images/tuition1.avif",
+  "images/tuition2.jpg",
+  "images/tuition3.jpg",
+  "images/tuition4.jpg",
+  "images/tuition5.jpg",
+  "images/tuition6.jpg",
+  "images/tuition7.jpg",
+  "images/tuition8.jpg",
+  "images/tuition9.jpg",
+  "images/tuition10.jpg",
+  "images/tuition11.jpg",
+  "images/tuition12.jpg",
+  "images/tuition13.jpg",
+  "images/tuition14.jpg",
+  "images/tuition15.jpg",
+  "images/tuition16.jpg",
+  "images/tuition17.jpg",
+  "images/tuition18.jpg",
+  "images/tuition19.jpg",
+  "images/tuition20.jpg",
+  "images/tuition21.jpg",
+  "images/tuition22.jpg",
+  "images/tuition23.jpg",
+  "images/tuition24.jpg",
+  "images/tuition25.jpg",
+].map(getImagePath); // Apply base URL to all images
 
 // Generate 1000+ tuitions
 const baseNames = ["FIITJEE","Allen","Aakash","Resonance","Vibrant","Bansal","Narayana","PACE","Motion","Rao IIT","Vidyamandir","Sri Chaitanya","Brilliant","Super 30","Drishti IAS","Vision IAS","Vajiram","Unacademy","Physics Wallah","Vedantu","Byju's","Mahesh Tutorials","Lakshya","Prime","Elite","Quantum","Target Point","Success Forum"];

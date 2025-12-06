@@ -96,7 +96,7 @@ const AllTuitions = () => {
               className="group block bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
             >
               <img
-                src={getTuitionImage(tuition.id - 1)}
+                src={getTuitionImage(tuition.id)}
                 alt={tuition.name}
                 className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500"
               />

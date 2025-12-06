@@ -19,7 +19,7 @@ const InfoSection = () => {
 
         {/* Second Block */}
         <div className="order-last md:order-none">
-          <img src="/images/write-review.png" alt="Write Review" className="w-full h-auto max-w-sm mx-auto" />
+          <img src={`${import.meta.env.BASE_URL}/images/write-review.png`} alt="Write Review" className="w-full h-auto max-w-sm mx-auto" />
         </div>
         <div className="flex flex-col justify-center">
           <h2 className="text-2xl font-bold mb-4">Write an anonymous review</h2>

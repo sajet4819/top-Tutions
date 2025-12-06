@@ -48,8 +48,7 @@ const HeroSection = () => {
   return (
     <div
       className="relative w-full h-[80vh] bg-cover bg-center flex flex-col items-center justify-center text-white text-center px-4"
-      style={{ backgroundImage: "url('/hero-bg.jpg')" }}
-    >
+style={{ backgroundImage: `url(${import.meta.env.BASE_URL}hero-bg.jpg)` }}    >
       <div className="absolute inset-0 bg-black/50"></div>
 
       <div className="relative z-10 flex flex-col items-center w-full">
