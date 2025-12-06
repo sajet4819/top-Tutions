@@ -1,45 +1,87 @@
+// src/redux/authSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
-// This is the initial state of our "auth" slice.
-// It defines what the auth state looks like when the app first loads.
 const initialState = {
-  user: null,       // Will hold user data from Supabase (like email, id)
-  token: null,      // We can store the JWT token here if needed
-  userType: null,   // Will hold 'student' or 'class'
+  user: null,              // Firebase user object (uid, email, displayName, photoURL)
+  userType: null,          // 'student' or 'tuition_owner'
+  userProfile: null,       // Additional user data from Firestore (bio, location, etc.)
   isAuthenticated: false,
+  loading: false,          // For async operations
+  error: null,             // Store any auth errors
 };
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
-  // Reducers are functions that define how the state can be updated.
   reducers: {
-    // This action is called when a user successfully logs in or signs up.
-    login: (state, action) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token; // You can pass the token from Supabase session
-      state.userType = action.payload.userType; // Pass 'student' or 'class'
-      state.isAuthenticated = true;
+    // Set loading state
+    setLoading: (state, action) => {
+      state.loading = action.payload;
     },
-    // This action is called when a user logs out.
+
+    // Set error
+    setError: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
+
+    // Login action - called after Firebase auth success
+    login: (state, action) => {
+      state.user = action.payload.user;           // Firebase user (uid, email, etc.)
+      state.userType = action.payload.userType;   // 'student' or 'tuition_owner'
+      state.userProfile = action.payload.userProfile || null; // Firestore profile data
+      state.isAuthenticated = true;
+      state.loading = false;
+      state.error = null;
+    },
+
+    // Update user profile (after editing profile, etc.)
+    updateProfile: (state, action) => {
+      state.userProfile = {
+        ...state.userProfile,
+        ...action.payload
+      };
+    },
+
+    // Logout action
     logout: (state) => {
       state.user = null;
-      state.token = null;
       state.userType = null;
+      state.userProfile = null;
       state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
     },
-    // You can add a register action if you need to handle specific
-    // registration logic, but often login can handle the session creation.
-    register: (state, action) => {
-        // For now, registration success can be handled by the login flow
-        // after email verification. You can add specific logic here if needed.
-        console.log("Registration action dispatched:", action.payload);
+
+    // Clear error
+    clearError: (state) => {
+      state.error = null;
     }
   },
 });
 
-// Export the actions so we can use them in our components (e.g., dispatch(login()))
-export const { login, logout, register } = authSlice.actions;
+// Export actions
+export const { 
+  login, 
+  logout, 
+  updateProfile, 
+  setLoading, 
+  setError, 
+  clearError 
+} = authSlice.actions;
 
-// Export the reducer so we can add it to our Redux store
+// Selectors (helper functions to get data from state)
+export const selectUser = (state) => state.auth.user;
+export const selectUserType = (state) => state.auth.userType;
+export const selectUserProfile = (state) => state.auth.userProfile;
+export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
+export const selectAuthLoading = (state) => state.auth.loading;
+export const selectAuthError = (state) => state.auth.error;
+
+// Check if user is tuition owner
+export const selectIsTuitionOwner = (state) => state.auth.userType === 'tuition_owner';
+
+// Check if user is student
+export const selectIsStudent = (state) => state.auth.userType === 'student';
+
 export default authSlice.reducer;

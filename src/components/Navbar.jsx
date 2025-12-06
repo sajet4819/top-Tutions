@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+// src/components/Navbar.jsx
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebaseConfig";
 import { logout } from "../redux/authSlice";
+import { selectUser, selectIsAuthenticated, selectUserType } from "../redux/authSlice";
 import {
   FaInstagram,
   FaLinkedin,
@@ -11,22 +15,51 @@ import {
   FaSignOutAlt,
   FaChalkboardTeacher,
   FaGraduationCap,
+  FaBell,
+  FaHome,
+  FaSearch,
+  FaInfoCircle,
+  FaNewspaper
 } from "react-icons/fa";
 
 const Navbar = () => {
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const user = useSelector(selectUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userType = useSelector(selectUserType);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    dispatch(logout());
-    navigate("/login");
-    setDropdownOpen(false);
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
     setIsOpen(false);
+    setDropdownOpen(false);
+  }, [location]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      dispatch(logout());
+      localStorage.removeItem("userType");
+      navigate("/");
+      setDropdownOpen(false);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const handleNavigate = (path) => {
@@ -36,147 +69,233 @@ const Navbar = () => {
   };
 
   const getDashboardRoute = () =>
-    user?.role === "class" ? "/classdashboard" : "/studentdashboard";
+    userType === "tuition_owner" ? "/tuition-dashboard" : "/student-dashboard";
 
   const getDashboardLabel = () =>
-    user?.role === "class" ? "Manage Classes" : "My Dashboard";
+    userType === "tuition_owner" ? "Tuition Dashboard" : "Student Dashboard";
 
   const getDashboardIcon = () =>
-    user?.role === "class" ? (
+    userType === "tuition_owner" ? (
       <FaChalkboardTeacher className="text-xl" />
     ) : (
       <FaGraduationCap className="text-xl" />
     );
 
+  const isActive = (path) => location.pathname === path;
+
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const userAvatar = user?.photoURL;
+
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center relative">
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white shadow-md'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
 
-        {/* MOBILE LOGO */}
-        <div className="md:hidden flex items-center">
-          <span
-            onClick={() => navigate("/")}
-            className="text-2xl font-extrabold tracking-wide cursor-pointer"
+        {/* LEFT: Logo (Mobile & Desktop) */}
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="text-2xl md:text-3xl font-extrabold tracking-wide">
+              <span className="text-black">Top</span>
+              <span className=" bg-clip-text bg-gradient-to-r text-blue-600">Tuitions</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* CENTER: Desktop Navigation Links */}
+        <div className="hidden md:flex items-center gap-8">
+          <Link 
+            to="/" 
+            className={`flex items-center gap-2 font-semibold transition-all duration-300 ${
+              isActive('/') 
+                ? 'text-blue-600' 
+                : 'text-gray-700 hover:text-blue-600'
+            }`}
           >
-            <span className="text-black">Top</span>
-            <span className="text-blue-500">Tuitions</span>
-          </span>
-        </div>
-
-        {/* LEFT ICONS (Desktop Only) */}
-        <div className="hidden md:flex gap-6 items-center">
-          <a className="text-2xl hover:text-blue-500 transition">
-            <FaInstagram />
-          </a>
-          <a className="text-2xl hover:text-blue-500 transition">
-            <FaLinkedin />
-          </a>
-        </div>
-
-        {/* CENTER LOGO (Desktop Only) */}
-        <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 cursor-pointer">
-          <span
-            onClick={() => navigate("/")}
-            className="text-3xl font-extrabold tracking-wide"
+            <FaHome className="text-lg" />
+            Home
+          </Link>
+          <Link 
+            to="/all-tuitions" 
+            className={`flex items-center gap-2 font-semibold transition-all duration-300 ${
+              isActive('/all-tuitions') 
+                ? 'text-blue-600' 
+                : 'text-gray-700 hover:text-blue-600'
+            }`}
           >
-            <span className="text-black">Top</span>
-            <span className="text-blue-500">Tuitions</span>
-          </span>
+            <FaSearch className="text-lg" />
+            Tuitions
+          </Link>
+          <Link 
+            to="/feed" 
+            className={`flex items-center gap-2 font-semibold transition-all duration-300 ${
+              isActive('/feed') 
+                ? 'text-blue-600' 
+                : 'text-gray-700 hover:text-blue-600'
+            }`}
+          >
+            <FaNewspaper className="text-lg" />
+            Feed
+          </Link>
+          <Link 
+            to="/about" 
+            className={`flex items-center gap-2 font-semibold transition-all duration-300 ${
+              isActive('/about') 
+                ? 'text-blue-600' 
+                : 'text-gray-700 hover:text-blue-600'
+            }`}
+          >
+            <FaInfoCircle className="text-lg" />
+            About
+          </Link>
         </div>
 
-        {/* RIGHT SECTION */}
-        <div className="flex items-center gap-8">
+        {/* RIGHT: Profile/Login & Social Icons */}
+        <div className="flex items-center gap-4">
 
-          {/* DESKTOP LINKS */}
-          <div className="hidden md:flex gap-8 text-gray-700 font-medium">
-            <Link to="/" className="hover:text-blue-500 transition">Home</Link>
-            <Link to="/all-tuitions" className="hover:text-blue-500 transition">Tuitions</Link>
-            <Link to="/about" className="hover:text-blue-500 transition">About</Link>
-            <Link to="/blog" className="hover:text-blue-500 transition">Blog</Link>
+          {/* Social Icons (Desktop Only) */}
+          <div className="hidden lg:flex gap-4 items-center">
+            <a 
+              href="https://instagram.com" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-2xl text-gray-600 hover:text-pink-600 transition"
+            >
+              <FaInstagram />
+            </a>
+            <a 
+              href="https://linkedin.com" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-2xl text-gray-600 hover:text-blue-600 transition"
+            >
+              <FaLinkedin />
+            </a>
           </div>
 
-          {/* PROFILE */}
+          {/* Profile/Login */}
           {isAuthenticated && user ? (
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="focus:outline-none"
+                className="focus:outline-none group"
               >
-                {user.photo ? (
+                {userAvatar ? (
                   <img
-                    src={user.photo}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow hover:scale-105 transition duration-200"
+                    src={userAvatar}
+                    alt="Profile"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-blue-500 shadow-md group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow">
-                    {user.email?.[0].toUpperCase()}
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg md:text-2xl font-bold shadow-md group-hover:scale-110 transition-transform duration-300">
+                    {displayName.charAt(0).toUpperCase()}
                   </div>
                 )}
               </button>
 
-              {/* DROPDOWN */}
+              {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 mt-4 w-72 bg-white rounded-2xl shadow-xl border overflow-hidden animate-fade-in">
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="fixed inset-0 z-40"
+                    onClick={() => setDropdownOpen(false)}
+                  ></div>
 
-                  <div className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 text-center border-b">
-                    {user.photo ? (
-                      <img
-                        src={user.photo}
-                        className="w-24 h-24 rounded-full mx-auto border-4 border-white shadow-md"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mx-auto flex items-center justify-center text-white text-5xl font-bold shadow-md">
-                        {user.email?.[0].toUpperCase()}
+                  {/* Dropdown */}
+                  <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-[slideDown_0.3s_ease-out]">
+
+                    {/* Profile Header */}
+                    <div className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-center border-b">
+                      {userAvatar ? (
+                        <img
+                          src={userAvatar}
+                          alt="Profile"
+                          className="w-20 h-20 rounded-full mx-auto border-4 border-white shadow-lg"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mx-auto flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                          {displayName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+
+                      <p className="mt-4 font-bold text-xl text-gray-800">
+                        {displayName}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {user.email}
+                      </p>
+                      <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 border border-blue-200">
+                        {userType === "tuition_owner" ? (
+                          <>
+                            <FaChalkboardTeacher className="text-purple-600" />
+                            <span className="text-sm font-semibold text-purple-700">Tuition Owner</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaGraduationCap className="text-blue-600" />
+                            <span className="text-sm font-semibold text-blue-700">Student</span>
+                          </>
+                        )}
                       </div>
-                    )}
+                    </div>
 
-                    <p className="mt-4 font-bold text-xl text-gray-800">
-                      {user.name || user.email}
-                    </p>
-                    <p className="text-sm text-gray-600 capitalize font-medium">
-                      {user.role === "class" ? "Class Owner" : "Student"}
-                    </p>
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      <button
+                        onClick={() => handleNavigate(getDashboardRoute())}
+                        className="w-full px-6 py-3 flex items-center gap-4 text-gray-700 hover:bg-blue-50 transition font-semibold"
+                      >
+                        {getDashboardIcon()}
+                        <span>{getDashboardLabel()}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavigate(userType === "student" ? "/profile" : "/tuition-profile")}
+                        className="w-full px-6 py-3 flex items-center gap-4 text-gray-700 hover:bg-blue-50 transition font-semibold"
+                      >
+                        <FaUserCircle className="text-xl" />
+                        My Profile
+                      </button>
+
+                      {userType === "tuition_owner" && (
+                        <button
+                          onClick={() => handleNavigate("/create-post")}
+                          className="w-full px-6 py-3 flex items-center gap-4 text-gray-700 hover:bg-blue-50 transition font-semibold"
+                        >
+                          <FaBell className="text-xl" />
+                          Create Post
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="border-t"></div>
+
+                    {/* Logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-6 py-3 flex items-center gap-4 text-red-600 hover:bg-red-50 transition font-bold"
+                    >
+                      <FaSignOutAlt className="text-xl" /> 
+                      Logout
+                    </button>
                   </div>
-
-                  <button
-                    onClick={() => handleNavigate(getDashboardRoute())}
-                    className="w-full px-6 py-4 flex items-center gap-4 text-gray-700 hover:bg-blue-50 transition"
-                  >
-                    {getDashboardIcon()}
-                    <span className="font-semibold">{getDashboardLabel()}</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleNavigate("/userprofile")}
-                    className="w-full px-6 py-4 flex items-center gap-4 text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    <FaUserCircle className="text-xl" />
-                    My Profile
-                  </button>
-
-                  <div className="border-t"></div>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-6 py-4 flex items-center gap-4 text-red-600 hover:bg-red-50 transition font-semibold"
-                  >
-                    <FaSignOutAlt className="text-xl" /> Logout
-                  </button>
-                </div>
+                </>
               )}
             </div>
           ) : (
-            <button
-              onClick={() => navigate("/login")}
-              className="bg-blue-500 text-white px-7 py-3 rounded-full font-semibold hover:bg-blue-600 shadow-md transition"
-            >
+            <Link
+  to="/login"
+  className="bg-black text-white px-6 py-2.5 md:px-8 md:py-3 rounded-full font-bold hover:bg-neutral-900 shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base"
+>
+
               Sign In
-            </button>
+            </Link>
           )}
 
-          {/* MOBILE MENU BUTTON */}
+          {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-3xl"
+            className="md:hidden text-3xl text-gray-700 hover:text-blue-600 transition"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <FaTimes /> : <FaBars />}
@@ -184,51 +303,81 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE MENU */}
+      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white shadow-xl py-8 text-center space-y-6 border-t animate-slide-down">
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setIsOpen(false)}
+          ></div>
 
-          <Link to="/" onClick={() => setIsOpen(false)} className="block text-lg text-gray-700 hover:text-blue-500">Home</Link>
-          <Link to="/all-tuitions" onClick={() => setIsOpen(false)} className="block text-lg text-gray-700 hover:text-blue-500">Tuitions</Link>
-          <Link to="/about" onClick={() => setIsOpen(false)} className="block text-lg text-gray-700 hover:text-blue-500">About</Link>
-          <Link to="/blog" onClick={() => setIsOpen(false)} className="block text-lg text-gray-700 hover:text-blue-500">Blog</Link>
+          {/* Menu Content */}
+          <div className="fixed top-[72px] left-0 right-0 bg-white shadow-2xl z-50 md:hidden animate-[slideDown_0.3s_ease-out] max-h-[calc(100vh-72px)] overflow-y-auto">
+            <div className="py-6 px-4 space-y-2">
 
-          {isAuthenticated && user && (
-            <>
-              <div className="pt-6 border-t">
-                {user.photo ? (
-                  <img
-                    src={user.photo}
-                    className="w-28 h-28 rounded-full mx-auto border-4 border-blue-500 shadow-xl"
-                  />
-                ) : (
-                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mx-auto flex items-center justify-center text-white text-5xl font-bold shadow-xl">
-                    {user.email?.[0].toUpperCase()}
-                  </div>
-                )}
+              <Link 
+                to="/" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition ${
+                  isActive('/') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <FaHome className="text-xl" />
+                Home
+              </Link>
 
-                <p className="mt-4 font-bold text-2xl">{user.name || user.email}</p>
-                <p className="text-gray-600 capitalize">
-                  {user.role === "class" ? "Class Owner" : "Student"}
-                </p>
+              <Link 
+                to="/all-tuitions" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition ${
+                  isActive('/all-tuitions') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <FaSearch className="text-xl" />
+                Tuitions
+              </Link>
+
+              <Link 
+                to="/feed" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition ${
+                  isActive('/feed') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <FaNewspaper className="text-xl" />
+                Feed
+              </Link>
+
+              <Link 
+                to="/about" 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition ${
+                  isActive('/about') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <FaInfoCircle className="text-xl" />
+                About
+              </Link>
+
+              {/* Social Links */}
+              <div className="flex gap-4 justify-center pt-4 border-t mt-4">
+                <a 
+                  href="https://instagram.com" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-3xl text-pink-600 hover:scale-110 transition"
+                >
+                  <FaInstagram />
+                </a>
+                <a 
+                  href="https://linkedin.com" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-3xl text-blue-600 hover:scale-110 transition"
+                >
+                  <FaLinkedin />
+                </a>
               </div>
-
-              <button
-                onClick={() => handleNavigate(getDashboardRoute())}
-                className="bg-blue-500 text-white px-10 py-4 rounded-full text-lg font-bold shadow-lg mt-4"
-              >
-                {getDashboardLabel()}
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-12 py-4 rounded-full text-lg font-bold mt-4"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        </>
       )}
     </nav>
   );

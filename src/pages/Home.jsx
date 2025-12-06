@@ -1,17 +1,35 @@
+// src/pages/Home.jsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated, selectUserType } from '../redux/authSlice';
 import HeroSection from '../components/HeroSection';
 import FeaturedTuitions from '../components/FeaturedTuitions';
-import InfoSection from '../components/InfoSection';
-
-// The Footer component is no longer needed here because it's in App.jsx
+import RecentPosts from '../components/RecentPosts';
+import CTASection from '../components/CTASection';
+import StatsSection from '../components/StatsSection';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userType = useSelector(selectUserType);
+
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Hero Section - Main banner */}
       <HeroSection />
+
+      {/* Stats Section - Show platform stats */}
+      <StatsSection />
+
+      {/* Featured Tuitions - Top tuition centers */}
       <FeaturedTuitions />
-      <InfoSection />
-      {/* --- The Footer component has been removed from here --- */}
+
+      {/* Recent Posts - Latest updates from tuitions (preview) */}
+      <RecentPosts />
+
+      {/* CTA Section - Call to action based on user state */}
+      <CTASection />
     </div>
   );
 };
