@@ -14,7 +14,7 @@ const InfoSection = () => {
           </p>
         </div>
         <div>
-          <img src="/images/search-tuition.png" alt="Search Tuition" className="w-full h-auto max-w-sm mx-auto" />
+           <img src={`${import.meta.env.BASE_URL}/images/search-tuition.png`} alt="Search Tuition" className="w-full h-auto max-w-sm mx-auto" />
         </div>
 
         {/* Second Block */}
