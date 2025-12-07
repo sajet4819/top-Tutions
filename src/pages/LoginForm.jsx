@@ -126,60 +126,63 @@ function LoginForm() {
   };
 
   // EMAIL LOGIN
-  const handleEmailLogin = async (e) => {
-    e.preventDefault();
-      // ---------- POV TEST ACCOUNTS (No Firebase Needed) ----------
+const handleEmailLogin = async (e) => {
+  e.preventDefault();
+
+  // -------------------- POV TEST ACCOUNTS --------------------
   if (email === "adminstudent@123" && password === "123") {
     dispatch(login({
       user: {
-        uid: "STUDENT-ADMIN-UID",
+        uid: "STUDENT-POV-UID",
         email: "adminstudent@123",
-        displayName: "Admin Student View",
+        displayName: "Student POV",
         photoURL: null
       },
       userType: "student",
       userProfile: {
-        name: "Admin Student POV",
         email: "adminstudent@123",
+        name: "Admin Student POV",
         userType: "student"
       }
     }));
-  
+
     localStorage.setItem("userType", "student");
     navigate("/student-dashboard");
-    return;
+    return; // STOP HERE
   }
 
   if (email === "adminclassowner@123" && password === "123") {
     dispatch(login({
       user: {
-        uid: "OWNER-ADMIN-UID",
+        uid: "OWNER-POV-UID",
         email: "adminclassowner@123",
-        displayName: "Admin Class Owner View",
+        displayName: "Class Owner POV",
         photoURL: null
       },
       userType: "tuition_owner",
       userProfile: {
-        name: "Admin Owner POV",
         email: "adminclassowner@123",
+        name: "Admin Class Owner POV",
         userType: "tuition_owner"
       }
     }));
-  
+
     localStorage.setItem("userType", "tuition_owner");
     navigate("/tuition-dashboard");
-    return;
+    return; // STOP HERE
   }
+  // ------------------------------------------------------------
 
-    try {
-      dispatch(setLoading(true));
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      await completeLogin(result.user, userType);
-    } catch (err) {
-      dispatch(setError(err.message));
-      alert('Login Failed: ' + err.message);
-    }
-  };
+  try {
+    dispatch(setLoading(true));
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    await completeLogin(result.user, userType);
+  } catch (err) {
+    dispatch(setError(err.message));
+    alert("Login Failed: " + err.message);
+  }
+};
+
 
   // PHONE OTP - Setup Recaptcha
   const setupRecaptcha = () => {
