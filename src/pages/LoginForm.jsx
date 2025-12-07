@@ -128,6 +128,49 @@ function LoginForm() {
   // EMAIL LOGIN
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+      // ---------- POV TEST ACCOUNTS (No Firebase Needed) ----------
+  if (email === "adminstudent@123" && password === "123") {
+    dispatch(login({
+      user: {
+        uid: "STUDENT-ADMIN-UID",
+        email: "adminstudent@123",
+        displayName: "Admin Student View",
+        photoURL: null
+      },
+      userType: "student",
+      userProfile: {
+        name: "Admin Student POV",
+        email: "adminstudent@123",
+        userType: "student"
+      }
+    }));
+  
+    localStorage.setItem("userType", "student");
+    navigate("/student-dashboard");
+    return;
+  }
+
+  if (email === "adminclassowner@123" && password === "123") {
+    dispatch(login({
+      user: {
+        uid: "OWNER-ADMIN-UID",
+        email: "adminclassowner@123",
+        displayName: "Admin Class Owner View",
+        photoURL: null
+      },
+      userType: "tuition_owner",
+      userProfile: {
+        name: "Admin Owner POV",
+        email: "adminclassowner@123",
+        userType: "tuition_owner"
+      }
+    }));
+  
+    localStorage.setItem("userType", "tuition_owner");
+    navigate("/tuition-dashboard");
+    return;
+  }
+
     try {
       dispatch(setLoading(true));
       const result = await signInWithEmailAndPassword(auth, email, password);
