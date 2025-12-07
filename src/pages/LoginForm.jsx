@@ -129,51 +129,48 @@ function LoginForm() {
 const handleEmailLogin = async (e) => {
   e.preventDefault();
 
-  // -------------------- POV TEST ACCOUNTS --------------------
+  // -------------------- ADMIN POV TEST ACCOUNTS --------------------
   if (email === "adminstudent@123" && password === "123") {
     dispatch(login({
       user: {
-        uid: "STUDENT-POV-UID",
+        uid: "ADMIN-STUDENT-POV",
         email: "adminstudent@123",
-        displayName: "Student POV",
-        photoURL: null
+        displayName: "Admin Student POV",
       },
       userType: "student",
       userProfile: {
-        email: "adminstudent@123",
         name: "Admin Student POV",
-        userType: "student"
+        userType: "student",
+        email: "adminstudent@123"
       }
     }));
-
     localStorage.setItem("userType", "student");
     navigate("/student-dashboard");
-    return; // STOP HERE
+    return;  // IMPORTANT — stops Firebase from running
   }
 
   if (email === "adminclassowner@123" && password === "123") {
     dispatch(login({
       user: {
-        uid: "OWNER-POV-UID",
+        uid: "ADMIN-OWNER-POV",
         email: "adminclassowner@123",
-        displayName: "Class Owner POV",
-        photoURL: null
+        displayName: "Admin Owner POV",
       },
       userType: "tuition_owner",
       userProfile: {
-        email: "adminclassowner@123",
         name: "Admin Class Owner POV",
-        userType: "tuition_owner"
+        userType: "tuition_owner",
+        email: "adminclassowner@123"
       }
     }));
-
     localStorage.setItem("userType", "tuition_owner");
     navigate("/tuition-dashboard");
-    return; // STOP HERE
+    return;  // IMPORTANT — stops Firebase from running
   }
-  // ------------------------------------------------------------
+  // ----------------------------------------------------------------
 
-  try {
+
+    try {
     dispatch(setLoading(true));
     const result = await signInWithEmailAndPassword(auth, email, password);
     await completeLogin(result.user, userType);
