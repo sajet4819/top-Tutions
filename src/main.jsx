@@ -13,7 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     {/* Provide the Redux store to the entire application */}
     <Provider store={store}>
       {/* Provide routing capabilities to the entire application */}
-      <BrowserRouter basename={basename}>
+      <BrowserRouter >
   <App />
 </BrowserRouter>
     </Provider>
